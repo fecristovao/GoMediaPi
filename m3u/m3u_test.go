@@ -4,6 +4,8 @@ import (
 	"testing"
 )
 
+var cg ChannelGroups
+
 func TestSearchGroupByName(t *testing.T) {
 	var cg ChannelGroups
 	testString := []string{"a", "b", "c", "d", "e", "f", "g"}
@@ -34,16 +36,15 @@ func TestSearchGroupByName(t *testing.T) {
 
 func TestParseFile(t *testing.T) {
 	m3uFile := "iptv.m3u"
-	cg := ParseFile(m3uFile)
+	cg = ParseFile(m3uFile)
 	
 	if cg == nil || len(cg) <= 0 {
 		t.Errorf("ParsedFile is nil or results <= 0")
 	}
+
 }
 
 func TestSearchChannelsByName(t *testing.T) {
-	m3uFile := "iptv.m3u"
-	cg := ParseFile(m3uFile)
 	foundChannels := cg.SearchChannelsByName("Globo RJ")
 	expectedResult := 5
 	foundResult := len(foundChannels)
