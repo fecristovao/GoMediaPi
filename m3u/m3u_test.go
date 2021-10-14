@@ -41,7 +41,6 @@ func TestParseFile(t *testing.T) {
 	if cg == nil || len(cg) <= 0 {
 		t.Errorf("ParsedFile is nil or results <= 0")
 	}
-
 }
 
 func TestSearchChannelsByName(t *testing.T) {
@@ -67,3 +66,10 @@ func TestParseURL(t *testing.T) {
 	}
 }
 
+
+func TestReadFile(t *testing.T) {
+	result := readFile("iptv.m3u")
+	if result == "" {
+		t.Errorf("FileRead isn't acting like expected")
+	}
+}
