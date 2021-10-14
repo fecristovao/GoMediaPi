@@ -60,29 +60,6 @@ func parseM3U(fileContent string) ChannelGroups {
 	return parsedData
 }
 
-func searchChannelsByName(channelName string, groups ChannelGroups) (Channels) {
-	var channels Channels
-	commChannel := make(chan Channels, 100)
-	
-	go func() {
-		defer close(commChannel)
-		for _, group := range groups {
-			commChannel <- group.ChannelList
-		}
-	}()
-
-	for channelList := range commChannel {
-		for _, channel := range channelList {
-			if strings.Contains(strings.ToLower(channel.Name), strings.ToLower(channelName)) {
-				channels = append(channels, channel)
-			}
-
-		}
-	}
-
-	return channels
-}
-
 /*
 	Parsers Functions
 */
@@ -113,20 +90,6 @@ func ParseURL(url string) ChannelGroups {
 /*
 	Search Function
 */
-
-func (groups ChannelGroups) SearchChannelsByName(channelName string) (Channels) {
-	var channels Channels
-	halfSize := len(groups)/2
-	
-	chans1 := searchChannelsByName(channelName, groups[:halfSize])
-	chans2 := searchChannelsByName(channelName, groups[halfSize:])
-
-	channels = append(channels, chans1...)
-	channels = append(channels, chans2...)
-
-	return channels
-}
-
 func (groups ChannelGroups) SearchGroupByName(groupName string) (int, error) {
 	for i, group := range groups {
 		if group.Name == groupName {
@@ -137,3 +100,25 @@ func (groups ChannelGroups) SearchGroupByName(groupName string) (int, error) {
 	return -1, errors.New("Group not found")
 }
 
+func (groups ChannelGroups) SearchChannelsByName(channelName string) (Channels) {
+	var channels Channels
+	commChannel := make(chan Channels, len(groups)/2)
+	
+	go func() {
+		defer close(commChannel)
+		for _, group := range groups {
+			commChannel <- group.ChannelList
+		}
+	}()
+
+	for channelList := range commChannel {
+		for _, channel := range channelList {
+			if strings.Contains(strings.ToLower(channel.Name), strings.ToLower(channelName)) {
+				channels = append(channels, channel)
+			}
+
+		}
+	}
+
+	return channels
+}
