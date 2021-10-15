@@ -26,7 +26,6 @@ func reader(conn *websocket.Conn) {
 			log.Println(err)
 			return
 		}
-
 		log.Printf("%d Bytes Received: %s\n", len(p), string(p))
 		commandBack := dispatcherFunc(p)
 		response, _ := json.Marshal(commandBack)

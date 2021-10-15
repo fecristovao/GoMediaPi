@@ -1,14 +1,14 @@
 package m3u
 
 import (
+	"bufio"
+	"errors"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
 	"regexp"
 	"strings"
-	"os"
-	"errors"
-	"log"
-	"bufio"
-	"net/http"
-	"io/ioutil"
 )
 
 /*
@@ -30,7 +30,7 @@ func readFile(file string) string {
 	}
 	err = scanner.Err()
 
-	return strings.Join(lines[:],"\n")
+	return strings.Join(lines[:], "\n")
 }
 
 func parseM3U(fileContent string) ChannelGroups {
@@ -55,7 +55,7 @@ func parseM3U(fileContent string) ChannelGroups {
 			group := &parsedData[indexOfGroup]
 			group.ChannelList = append(group.ChannelList, channel)
 		}
-		
+
 	}
 	return parsedData
 }
@@ -71,20 +71,20 @@ func ParseFile(fileName string) ChannelGroups {
 func ParseURL(url string) ChannelGroups {
 	var result ChannelGroups
 	response, err := http.Get(url)
-	
+
 	if err != nil {
 		return result
 	}
 	defer response.Body.Close()
-	
+
 	fileContent, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return result
 	}
-	
+
 	result = parseM3U(string(fileContent))
-	
-	return result 
+
+	return result
 }
 
 /*
@@ -100,10 +100,10 @@ func (groups ChannelGroups) SearchGroupByName(groupName string) (int, error) {
 	return -1, errors.New("Group not found")
 }
 
-func (groups ChannelGroups) SearchChannelsByName(channelName string) (Channels) {
+func (groups ChannelGroups) SearchChannelsByName(channelName string) Channels {
 	var channels Channels
 	commChannel := make(chan Channels, 100)
-	
+
 	go func() {
 		defer close(commChannel)
 		for _, group := range groups {
@@ -121,4 +121,28 @@ func (groups ChannelGroups) SearchChannelsByName(channelName string) (Channels) 
 	}
 
 	return channels
+}
+
+func (groups ChannelGroups) SearchChannelsByLink(streamLink string) Channel {
+	channelResult := Channel{}
+	commChannel := make(chan Channels, 100)
+
+	go func() {
+		defer close(commChannel)
+		for _, group := range groups {
+			commChannel <- group.ChannelList
+		}
+	}()
+
+	for channelList := range commChannel {
+		for _, channel := range channelList {
+			if channel.StreamLink == streamLink {
+				channelResult = channel
+				break
+			}
+		}
+	}
+
+	return channelResult
+
 }
