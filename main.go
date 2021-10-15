@@ -3,13 +3,13 @@ package main
 import (
 	"encoding/json"
 	"log"
-
+	"strings"
 	"github.com/fecristovao/GoModPi/m3u"
 	"github.com/fecristovao/GoModPi/vlc"
 	"github.com/fecristovao/GoModPi/websocket"
 )
 
-var parsedIPTV = m3u.ParseURL("http://ccsv.me/131551/1461")
+var parsedIPTV = m3u.ParseFile("/home/pi/GoMediaPi/iptv.m3u")
 var commands = map[string]func(interface{}) websocket.WebSocketPacket{
 	"getAllChannels": getAllChannels,
 	"watchChannel":   watchChannel,
@@ -22,8 +22,9 @@ func watchChannel(channel interface{}) websocket.WebSocketPacket {
 	selectedChannel := channel.(map[string]interface{})
 	response.Data = selectedChannel
 
-	link := selectedChannel["StreamLink"].(string)
-	vlc.OpenVLC("vlc", "--fullscreen --no-qt-error-dialogs --one-instance", link)
+	link := strings.Trim(selectedChannel["StreamLink"].(string), "\r")
+	link = strings.Trim(link, "\r\n")
+	vlc.OpenVLC("/usr/bin/vlc", "--fullscreen --no-qt-error-dialogs --one-instance", link)
 
 	return response
 }
