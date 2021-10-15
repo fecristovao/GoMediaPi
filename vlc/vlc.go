@@ -1,21 +1,20 @@
 package vlc
 
 import (
-	"os/exec"
 	"errors"
-	"strings"
+	"log"
 	"os"
+	"os/exec"
+	"strings"
 )
 
-
-func fileExists (filepath string) bool {
+func fileExists(filepath string) bool {
 	fileinfo, err := os.Stat(filepath)
-    if os.IsNotExist(err) {
+	if os.IsNotExist(err) {
 		return false
 	}
 	return !fileinfo.IsDir()
 }
-
 
 func OpenVLC(path string, params string, fileToOpen string) (int, error) {
 	pid := -1
@@ -30,7 +29,7 @@ func OpenVLC(path string, params string, fileToOpen string) (int, error) {
 	}
 
 	paramsSlice = append(paramsSlice, fileToOpen)
-
+	log.Printf("Openning vlc: %s %s %s", path, params, fileToOpen)
 	cmd := exec.Command(path, paramsSlice...)
 	err := cmd.Start()
 	if err != nil {
@@ -43,5 +42,5 @@ func OpenVLC(path string, params string, fileToOpen string) (int, error) {
 }
 
 func CloseVLC(pid int) {
-	
+
 }
