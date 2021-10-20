@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+<body>
+	<div id="app">
+		{{ watchingChannel }}
+		<div v-if="channels == {}">
+			Loading
+		</div>
+		<div v-else>
+			<select name="groups" id="groups" @change="selectGroup($event.target.value)">
+				<option :value="i" v-for="group,i in allChannels">{{ group.Name }}</option>
+			</select>
+		</div>
+		<input type="text" v-model="pesquisa" name="searchInp" id="searchInp"  @keyup.enter="pesquisar()"><button @click="pesquisar()">Pesquisar</button>
+		<div v-if="found != null">
+
+		</div>
+		<div v-if="selectedGroup != null">
+			<select name="channel" id="channel" @change="selectChannel($event.target.value)">
+				<option :value="i" v-for="channel, i in selectedGroup" > {{ channel.Name }}</option>
+			</select>
+			<button @click="watchChannel">Watch Channel</button>
+			
+			<p v-for="channel, i in selectedGroup">
+				<button @click="sendCommand('watchChannel', channel)">{{ channel.Name }}</button>
+			</p>
+
+			
+		</div>
+		
+	</div>	
+</body>
+
+<script>
+
+	var app = new Vue({
+		el: '#app',
+		data: {
+			geting: 0,
+			channels: {},
+			connection: null,
+			selectedGroup: null,
+			watchingChannel: null,
+			pesquisa: "",
+			found: null
+		},
+		computed: {
+			allChannels: function() {
+				return this.channels["data"]
+			}
+		},
+		methods: {
+			pesquisar() {
+				var vm = this
+				var len = this.allChannels.length;
+				var arr = this.allChannels
+				var founds = []
+				console.log(len)
+				var i = 0
+				for(i=0;i<len;i++)
+				{
+					for(j=0;j<arr[i].ChannelList.length;j++)
+					{
+						var name = arr[i].ChannelList[j].Name
+						//console.log(arr[i].ChannelList[j].Name)
+						//console.log(vm.pesquisa)
+						//console.log(name.includes(vm.pesquisa))
+						if(name.toLowerCase().includes(vm.pesquisa.toLowerCase()))
+						{
+							//console.log(arr[i].ChannelList[j])
+							founds.push(arr[i].ChannelList[j])
+						}
+					}
+				}
+				//console.log(founds)
+				this.selectedGroup = founds
+				
+			},
+			sendCommand(command, data) {
+				this.connection.send(JSON.stringify({
+							command: command,
+							data: data
+						}))
+			},
+			selectGroup(id) {
+				this.selectedGroup = this.allChannels[id].ChannelList
+			},
+			selectChannel(id) {
+				console.log(id)
+				this.watchingChannel = this.selectedGroup[id]
+			},
+			watchChannel() {
+				this.sendCommand("watchChannel", this.watchingChannel)
+			}
+		},
+		created: function() {
+			console.log("Trying to connect")
+			this.connection = new WebSocket("ws://192.168.1.3:8090/ws")
+
+			this.connection.onopen = () => {
+				console.log(this.geting)
+				if (this.geting <= 0) {
+					this.geting++
+					console.log("Getting Channels")
+					this.sendCommand("getAllChannels", [])
+				}
+			}
+
+			this.connection.onmessage = (msg) => {
+				parsedData = JSON.parse(msg.data)
+				console.log(parsedData.data)
+				if (parsedData.command == "getAllChannels") {
+					this.channels = parsedData
+				}
+				console.log(msg)
+			}
+		}
+	})
+</script>
+</html>

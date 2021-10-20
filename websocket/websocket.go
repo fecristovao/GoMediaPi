@@ -49,7 +49,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 func setupRoutes() {
-	http.HandleFunc("/", index)
+	fs := http.FileServer(http.Dir("static/"))
+	http.Handle("/", fs)
 	http.HandleFunc("/ws", handle)
 }
 
