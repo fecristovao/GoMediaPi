@@ -63,11 +63,14 @@ func parseM3U(fileContent string) ChannelGroups {
 /*
 	Parsers Functions
 */
+
+// ParseFile parses an m3u file
 func ParseFile(fileName string) ChannelGroups {
 	fileContent := readFile(fileName)
 	return parseM3U(fileContent)
 }
 
+// ParseURL parses an url of m3u file
 func ParseURL(url string) ChannelGroups {
 	var result ChannelGroups
 	response, err := http.Get(url)
@@ -90,6 +93,7 @@ func ParseURL(url string) ChannelGroups {
 /*
 	Search Function
 */
+// SearchGroupByName searchs an group of channels by name
 func (groups ChannelGroups) SearchGroupByName(groupName string) (int, error) {
 	for i, group := range groups {
 		if group.Name == groupName {
@@ -100,9 +104,11 @@ func (groups ChannelGroups) SearchGroupByName(groupName string) (int, error) {
 	return -1, errors.New("Group not found")
 }
 
+// SearchChannelsByName searchs an channel in an ChannelList by name
 func (groups ChannelGroups) SearchChannelsByName(channelName string) Channels {
 	var channels Channels
 	commChannel := make(chan Channels, 100)
+	foundChannel := make(chan Channel, 100)
 
 	go func() {
 		defer close(commChannel)
@@ -111,18 +117,25 @@ func (groups ChannelGroups) SearchChannelsByName(channelName string) Channels {
 		}
 	}()
 
-	for channelList := range commChannel {
-		for _, channel := range channelList {
-			if strings.Contains(strings.ToLower(channel.Name), strings.ToLower(channelName)) {
-				channels = append(channels, channel)
+	go func() {
+		defer close(foundChannel)
+		for channelList := range commChannel {
+			for _, channel := range channelList {
+				if strings.Contains(strings.ToLower(channel.Name), strings.ToLower(channelName)) {
+					foundChannel <- channel
+				}
 			}
-
 		}
+	}()
+
+	for channel := range foundChannel {
+		channels = append(channels, channel)
 	}
 
 	return channels
 }
 
+// SearchChannelsByName search an channel in ChannelList by link
 func (groups ChannelGroups) SearchChannelsByLink(streamLink string) Channel {
 	channelResult := Channel{}
 	commChannel := make(chan Channels, 100)
