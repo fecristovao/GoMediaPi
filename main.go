@@ -23,7 +23,7 @@ var commands = map[string]func(interface{}) websocket.WebSocketPacket{
 func stopVLC(interface{}) websocket.WebSocketPacket {
 	vlc.CloseVLC(vlcPID)
 	return websocket.WebSocketPacket{
-		Command: "pause",
+		Command: "stop",
 		Data:    "",
 	}
 }

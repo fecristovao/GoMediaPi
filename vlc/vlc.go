@@ -42,5 +42,6 @@ func OpenVLC(path string, params string, fileToOpen string) (int, error) {
 }
 
 func CloseVLC(pid int) {
-
+	cmd := exec.Command("/usr/bin/killall", "-9", "vlc")
+	cmd.Start()
 }
