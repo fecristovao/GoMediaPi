@@ -101,7 +101,7 @@
 		},
 		created: function() {
 			console.log("Trying to connect")
-			this.connection = new WebSocket("ws://192.168.1.3:8090/ws")
+			this.connection = new WebSocket("ws://127.0.0.1:8090/ws")
 
 			this.connection.onopen = () => {
 				console.log(this.geting)
