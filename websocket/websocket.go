@@ -65,6 +65,7 @@ func setupRoutes() {
 func StartServer(param string, dispatcher func(msg []byte) WebSocketPacket) {
 	dispatcherFunc = dispatcher
 	log.Println("Starting Server")
+	log.Printf("IP: %s\n", broadcast.GetOutboundIP())
 	setupRoutes()
 	log.Fatal(http.ListenAndServe(param, nil))
 }

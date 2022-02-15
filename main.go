@@ -11,7 +11,7 @@ import (
 )
 
 var parsedIPTV = m3u.ParseFile("iptv.m3u")
-var vlcPath = "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe"
+var vlcPath = "/usr/bin/vlc"
 
 var commands = map[string]func(interface{}) websocket.WebSocketPacket{
 	"getAllChannels": getAllChannels,
