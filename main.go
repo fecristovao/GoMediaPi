@@ -11,6 +11,8 @@ import (
 )
 
 var parsedIPTV = m3u.ParseFile("iptv.m3u")
+var vlcPath = "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe"
+
 var commands = map[string]func(interface{}) websocket.WebSocketPacket{
 	"getAllChannels": getAllChannels,
 	"watchChannel":   watchChannel,
@@ -25,7 +27,7 @@ func watchChannel(channel interface{}) websocket.WebSocketPacket {
 
 	link := strings.Trim(selectedChannel["StreamLink"].(string), "\r")
 	link = strings.Trim(link, "\r\n")
-	vlc.OpenVLC("C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe", "--fullscreen --no-qt-error-dialogs --one-instance", link)
+	vlc.OpenVLC(vlcPath, "--fullscreen --no-qt-error-dialogs --one-instance", link)
 
 	return response
 }

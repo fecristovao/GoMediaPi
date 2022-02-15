@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 )
 
 // GetOutboundIP return loval ip
@@ -21,26 +22,27 @@ func GetOutboundIP() net.IP {
 
 // StartBroadcast will start service that will send UDP packets on broadcast telling to others
 // dispostives what is the IP of socket
-func StartBroadcast(broadcastIP string, port int64) {
-	var temp string
-
-	temp = fmt.Sprintf(":%d", port)
+func StartBroadcast(broadcastIP string, portUDP int64, portWeb int64, interval time.Duration) {
+	temp := fmt.Sprintf(":%d", portUDP)
 	pc, err := net.ListenPacket("udp4", temp)
 	if err != nil {
 		panic(err)
 	}
 	defer pc.Close()
 
-	temp = fmt.Sprintf("%s:%d", broadcastIP, port)
-	addr, err := net.ResolveUDPAddr("udp4", temp)
-	if err != nil {
-		panic(err)
+	for {
+		buf := make([]byte, 1024)
+		n, addr, err := pc.ReadFrom(buf)
+		if err != nil {
+			continue
+		}
+
+		fmt.Printf("%s sent this: %s\n", addr, buf[:n])
+
+		temp = fmt.Sprintf("%s:%d\r\n", GetOutboundIP(), portWeb)
+
+		go pc.WriteTo([]byte(temp), addr)
+
 	}
 
-	fmt.Printf("%v\n", GetOutboundIP())
-	temp = fmt.Sprintf()
-	_, err := pc.WriteTo([]byte("data to transmit"), addr)
-	if err != nil {
-		panic(err)
-	}
 }
