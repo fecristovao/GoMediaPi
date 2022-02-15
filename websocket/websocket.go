@@ -49,16 +49,10 @@ func index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Home Page")
 }
 
-func discover(w http.ResponseWriter, r *http.Request) {
-	tmp := fmt.Sprintf("%s:8090\n", broadcast.GetOutboundIP())
-	fmt.Fprintf(w, tmp)
-}
-
 func setupRoutes() {
-	fs := http.FileServer(http.Dir("static/"))
+	fs := http.FileServer(http.Dir("/home/pi/GoMediaPi/static/"))
 	http.Handle("/", fs)
 	http.HandleFunc("/ws", handle)
-	http.HandleFunc("/discover", discover)
 }
 
 // StartServer WebServer

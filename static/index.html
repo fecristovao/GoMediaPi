@@ -11,7 +11,11 @@
 		IP
 		<input name="ip" id="ip" v-model="ipAddr" type="text" @keyup.enter="conectar()" value="192.168.1.4"></input>
 		<button @click="conectar">Conectar</button>
-		{{ watchingChannel }}
+		<br />
+		<button @click="acao('play')">Play</button>
+		<button @click="acao('pause')">Pause</button>
+		<button @click="acao('stop')">Stop</button>
+		<br /><br />{{ watchingChannel }}
 		<div v-if="channels == {}">
 			Loading
 		</div>
@@ -60,6 +64,9 @@
 			}
 		},
 		methods: {
+			acao(comando) {
+				this.sendCommand(comando, [])
+			},
 			conectar() {
 				console.log("Trying to connect")
 				this.connection = new WebSocket("ws://"+this.ipAddr+":8090/ws")
