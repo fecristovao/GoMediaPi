@@ -8,6 +8,9 @@
 </head>
 <body>
 	<div id="app">
+		IP
+		<input name="ip" id="ip" v-model="ipAddr" type="text" @keyup.enter="conectar()" value="192.168.1.4"></input>
+		<button @click="conectar">Conectar</button>
 		{{ watchingChannel }}
 		<div v-if="channels == {}">
 			Loading
@@ -48,6 +51,7 @@
 			selectedGroup: null,
 			watchingChannel: null,
 			pesquisa: "",
+			ipAddr: "",
 			found: null
 		},
 		computed: {
@@ -56,6 +60,28 @@
 			}
 		},
 		methods: {
+			conectar() {
+				console.log("Trying to connect")
+				this.connection = new WebSocket("ws://"+this.ipAddr+":8090/ws")
+
+				this.connection.onopen = () => {
+					console.log(this.geting)
+					if (this.geting <= 0) {
+						this.geting++
+						console.log("Getting Channels")
+						this.sendCommand("getAllChannels", [])
+					}
+				}
+
+				this.connection.onmessage = (msg) => {
+					parsedData = JSON.parse(msg.data)
+					console.log(parsedData.data)
+					if (parsedData.command == "getAllChannels") {
+						this.channels = parsedData
+					}
+					console.log(msg)
+				}
+			},
 			pesquisar() {
 				var vm = this
 				var len = this.allChannels.length;
@@ -100,26 +126,7 @@
 			}
 		},
 		created: function() {
-			console.log("Trying to connect")
-			this.connection = new WebSocket("ws://127.0.0.1:8090/ws")
-
-			this.connection.onopen = () => {
-				console.log(this.geting)
-				if (this.geting <= 0) {
-					this.geting++
-					console.log("Getting Channels")
-					this.sendCommand("getAllChannels", [])
-				}
-			}
-
-			this.connection.onmessage = (msg) => {
-				parsedData = JSON.parse(msg.data)
-				console.log(parsedData.data)
-				if (parsedData.command == "getAllChannels") {
-					this.channels = parsedData
-				}
-				console.log(msg)
-			}
+			
 		}
 	})
 </script>
