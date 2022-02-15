@@ -10,7 +10,7 @@ import (
 	"github.com/fecristovao/GoModPi/websocket"
 )
 
-var parsedIPTV = m3u.ParseFile("/home/pi/GoMediaPi/iptv.m3u")
+var parsedIPTV = m3u.ParseURL("http://bit.ly/3iv4soy")
 var vlcPath = "/usr/bin/vlc"
 var vlcPID = -1
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	broadcast "github.com/fecristovao/GoModPi/service-broadcast"
 	"github.com/gorilla/websocket"
@@ -55,9 +56,26 @@ func setupRoutes() {
 	http.HandleFunc("/ws", handle)
 }
 
+func connected() (ok bool) {
+	_, err := http.Get("http://clients3.google.com/generate_204")
+	if err != nil {
+		return false
+	}
+	return true
+}
+
 // StartServer WebServer
 func StartServer(param string, dispatcher func(msg []byte) WebSocketPacket) {
 	dispatcherFunc = dispatcher
+	for {
+		if !connected() {
+			log.Println("Waiting for network")
+			time.Sleep(1 * time.Second)
+		} else {
+			break
+		}
+	}
+
 	log.Println("Starting Server")
 	log.Printf("IP: %s\n", broadcast.GetOutboundIP())
 	setupRoutes()

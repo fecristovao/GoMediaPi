@@ -37,6 +37,7 @@ func parseM3U(fileContent string) ChannelGroups {
 	var parsedData ChannelGroups
 	re := regexp.MustCompile(`(?m)group-title="(.*?)",(.*?)\n(.*?)\n`)
 
+	log.Println("Parsing m3u file")
 	matches := re.FindAllStringSubmatch(fileContent, -1)
 	for _, match := range matches {
 		channel := Channel{}
